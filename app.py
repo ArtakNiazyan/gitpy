@@ -1,43 +1,78 @@
-from flask import Flask
-from flask import jsonify
+import logging
+import os
 
-from vc_service import GitHubManager
+from flask import Flask, request, jsonify
+
+import settings
+from exceptions import CommitNotFound, FileNotFound
+from utils import configure_log_file
+from vc_service import vc_manager
 
 app = Flask(__name__)
 
+branch_logger = configure_log_file("branch_logs.log")
+commit_logger = configure_log_file("commits_logs.log")
 
-@app.route('/last_commit')
+
+@app.route('/last_commit/')
 def last_commit():
-    github = GitHubManager()
-    commit = github.last_commit()
-    if commit:
-        return jsonify(commit.raw_data)
-    return jsonify({"message": "Commit not found", "status": 404})
+    """API view for getting last commit in the repository"""
+    try:
+        commit_data = app.vc_manager.last_commit()
+        resp = jsonify({"data": commit_data, "status": 200})
+    except CommitNotFound:
+        resp = jsonify({"data": "Commit not found", "status": 404})
+    return resp
 
 
-@app.route('/next_commit/<commit_hash>/')
-def next_commit(commit_hash):
-    github = GitHubManager()
-    commit = github.get_next_commit(commit_hash)
-    if commit:
-        return jsonify(commit.raw_data)
-    return jsonify({"message": "Commit not found", "status": 404})
+@app.route('/parent_commit/<commit_hash>/')
+def parent_commit(commit_hash):
+    """API view for getting next commit right after given one"""
+    try:
+        commit = app.vc_manager.get_parent_commit(commit_hash)
+        resp = jsonify({"data": commit.raw_data, "status": 200})
+    except CommitNotFound:
+        resp = jsonify({"data": "Commit Not Found", "status": 404})
+    return resp
 
 
 @app.route('/get_files/<commit_hash>/')
 def get_files(commit_hash):
-    github = GitHubManager()
-    files = github.get_files_from_commit(commit_hash)
-    if files:
-        return jsonify(files)
-    return jsonify({"message": "Commit not found", "status": 404})
+    """API view for getting files from commit"""
+    try:
+        files = app.vc_manager.get_files_from_commit(commit_hash)
+        resp = jsonify({"data": files, "status": 200})
+    except CommitNotFound:
+        resp = jsonify({"data": "Commit not found", "status": 404})
+    return resp
 
-@app.route('/get_file_content/<filename>/')
-def get_file_content(filename):
-    github = GitHubManager()
-    file_content = github.get_file_content(filename)
-    return jsonify({"content": file_content, "status": 200})
+
+@app.route('/get_file_content/')
+def get_file_content():
+    """API view for getting file content"""
+    filename = request.args.get("filename")
+    try:
+        file_content = app.vc_manager.get_file_content(filename)
+        resp = jsonify({"data": file_content, "status": 200})
+    except FileNotFound:
+        resp = jsonify({"data": "File not found", "status": 404})
+    return resp
+
+
+@app.route('/branch-created', methods=['POST'])
+def branch_created():
+    request_data = request.get_json()
+    branch_logger.info(request_data)
+    return 200
+
+
+@app.route('/commit-pushed', methods=['POST'])
+def commit_created():
+    request_data = request.get_json()
+    commit_logger.info(request_data)
+    return 200
 
 
 if __name__ == '__main__':
+    app.vc_manager = vc_manager
     app.run()
