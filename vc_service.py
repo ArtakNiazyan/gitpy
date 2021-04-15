@@ -10,6 +10,7 @@ from settings import REPOSITORY_URL
 
 class AbstractBaseVCManager(ABC):
     """Abstract Base class for Version Control Manager app"""
+
     @abstractmethod
     def get_repository(self):
         return NotImplemented
@@ -20,18 +21,27 @@ class AbstractBaseVCManager(ABC):
         return NotImplemented
 
     @abstractmethod
-    def get_parent_commit(self, commit_hash):
-        """Class method returns paren commit of given commit"""
+    def get_parent_commit(self, commit_hash: str):
+        """
+        Class method returns paren commit of given commit
+        @param commit_hash: str
+        """
         return NotImplemented
 
     @abstractmethod
-    def get_files_from_commit(self, commit_hash):
-        """Class method returns changed files in given commit"""
+    def get_files_from_commit(self, commit_hash: str):
+        """
+        Class method returns changed files in given commit
+        @param commit_hash: str
+        """
         return NotImplemented
 
     @abstractmethod
-    def get_file_content(self, filename):
-        """Class method returns content of given file"""
+    def get_file_content(self, filename: str):
+        """
+        Class method returns content of given file
+        @param filename: str
+        """
         return NotImplemented
 
 
@@ -41,6 +51,7 @@ class GitHubManager(AbstractBaseVCManager):
         self.repository = self.get_repository()
 
     def _get_commit(self, commit_hash):
+        """Internal method for getting commit object"""
         try:
             commit = self.repository.get_commit(commit_hash)
             return commit
@@ -58,17 +69,15 @@ class GitHubManager(AbstractBaseVCManager):
 
     def get_parent_commit(self, commit_hash):
         commit = self._get_commit(commit_hash)
-        if commit:
-            next_commit = commit.parents[0]
-            return next_commit.raw_data, 200
+        parent = commit.parents[0]
+        return parent
 
     def get_files_from_commit(self, commit_hash):
         commit = self._get_commit(commit_hash)
-        if commit:
-            files_arr = list()
-            for file in commit.files:
-                files_arr.append(file.raw_data)
-            return files_arr
+        files_arr = list()
+        for file in commit.files:
+            files_arr.append(file.raw_data)
+        return files_arr
 
     def get_file_content(self, filename):
         try:
@@ -79,8 +88,8 @@ class GitHubManager(AbstractBaseVCManager):
 
 
 def get_vc_manager():
-    vc = os.environ.get("VC_MANAGER", "github")
-    if vc.lower() == "github":
+    vc = os.environ.get("VC_SYSTEM", "git")
+    if vc.lower() == "git":
         return GitHubManager()
     else:
         raise NotImplementedError

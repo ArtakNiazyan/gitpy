@@ -2,7 +2,11 @@ import logging
 import os
 
 
-def configure_log_file(filename):
+def configure_log_file(filename: str):
+    """
+    Util function for configuring file logger
+    @param filename: str
+    """
     logger = logging.getLogger(__name__)
     ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
     log_base_dir = "logs/"
