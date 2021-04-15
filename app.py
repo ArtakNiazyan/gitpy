@@ -75,5 +75,5 @@ def commit_created():
 if __name__ == '__main__':
     app.vc_manager = vc_manager
     app.branch_logger = configure_log_file("branch_logs")
-    app.commit_logger = configure_log_file("commits_logs")
+    app.commit_logger = configure_log_file("commit_logs")
     app.run()
