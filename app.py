@@ -6,9 +6,6 @@ from vc_service import vc_manager
 
 app = Flask(__name__)
 
-app.branch_logger = configure_log_file("branch_logs")
-app.commit_logger = configure_log_file("commits_logs")
-
 
 @app.route('/last_commit/')
 def last_commit():
@@ -59,16 +56,18 @@ def get_file_content():
 def branch_created():
     request_data = request.get_json()
     app.branch_logger.info(request_data)
-    return 200
+    return jsonify({"status": 200})
 
 
 @app.route('/commit-pushed', methods=['POST'])
 def commit_created():
     request_data = request.get_json()
     app.commit_logger.info(request_data)
-    return 200
+    return jsonify({"status": 200})
 
 
 if __name__ == '__main__':
     app.vc_manager = vc_manager
+    app.branch_logger = configure_log_file("branch_logs")
+    app.commit_logger = configure_log_file("commits_logs")
     app.run()
