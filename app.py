@@ -1,17 +1,13 @@
-import logging
-import os
-
 from flask import Flask, request, jsonify
 
-import settings
 from exceptions import CommitNotFound, FileNotFound
 from utils import configure_log_file
 from vc_service import vc_manager
 
 app = Flask(__name__)
 
-branch_logger = configure_log_file("branch_logs")
-commit_logger = configure_log_file("commits_logs")
+app.branch_logger = configure_log_file("branch_logs")
+app.commit_logger = configure_log_file("commits_logs")
 
 
 @app.route('/last_commit/')
@@ -61,17 +57,15 @@ def get_file_content():
 
 @app.route('/branch-created', methods=['POST'])
 def branch_created():
-    print(666666666666666)
     request_data = request.get_json()
-    print(request_data, 66666666666)
-    branch_logger.info(request_data)
+    app.branch_logger.info(request_data)
     return 200
 
 
 @app.route('/commit-pushed', methods=['POST'])
 def commit_created():
     request_data = request.get_json()
-    commit_logger.info(request_data)
+    app.commit_logger.info(request_data)
     return 200
 
 
