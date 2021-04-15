@@ -12,7 +12,7 @@ def last_commit():
     """API route for getting last commit in the repository"""
     try:
         commit_data = app.vc_manager.last_commit()
-        resp = jsonify({"data": commit_data, "status": 200})
+        resp = commit_data
     except CommitNotFound:
         resp = jsonify({"data": "Commit not found", "status": 404})
     return resp
