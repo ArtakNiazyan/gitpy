@@ -15,3 +15,4 @@ def configure_log_file(filename):
     handler.setFormatter(formatter)
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)
+    return logger
