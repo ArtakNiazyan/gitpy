@@ -75,7 +75,7 @@ class GitHubManager(AbstractBaseVCManager):
             file_content = self.repository.get_contents(filename)
         except UnknownObjectException:
             raise FileNotFound
-        return file_content.decoded_content.decode(), 200
+        return file_content.decoded_content.decode()
 
 
 def get_vc_manager():

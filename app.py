@@ -10,8 +10,8 @@ from vc_service import vc_manager
 
 app = Flask(__name__)
 
-branch_logger = configure_log_file("branch_logs.log")
-commit_logger = configure_log_file("commits_logs.log")
+branch_logger = configure_log_file("branch_logs")
+commit_logger = configure_log_file("commits_logs")
 
 
 @app.route('/last_commit/')
@@ -61,7 +61,9 @@ def get_file_content():
 
 @app.route('/branch-created', methods=['POST'])
 def branch_created():
+    print(666666666666666)
     request_data = request.get_json()
+    print(request_data, 66666666666)
     branch_logger.info(request_data)
     return 200
 
